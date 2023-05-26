@@ -1,0 +1,7 @@
+.global_container{
+    display: flex;
+    flex-direction: column;
+    background-color: #F4F7FE;
+    box-sizing: border-box; 
+    padding: 15px; 
+}
