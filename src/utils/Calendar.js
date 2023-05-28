@@ -16,7 +16,6 @@ export default function Calendar(
   { 
     selectedDate, 
     setSelectedDate,
-    selectedTime,
     setSelectedTime, 
     unavailableDates = [], 
     availableDates = [], 
@@ -30,17 +29,19 @@ export default function Calendar(
   const [selectedEndTime, setSelectedEndTime] = useState(null);
   const [confirmTime, setConfirmTime] = useState(null);
 
+  const token = localStorage.getItem("token");
+
   const handleDateClick = (date) => {
     if (isDateAvailable(date)) {
       const dateString = `${date.getFullYear()}-${('0' + (date.getMonth()+1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`;
       if (dateString === selectedDate) {
-        setSelectedDate(null);
+        setSelectedDate('');
         setSelectedStartTime(null);
         setSelectedEndTime(null);
-      } else {
+      } 
+      else {
         setSelectedDate(dateString);
         showTimeModal(date);
-        alert(`Selected Date: ${dateString}`);
       }
     }
   };
@@ -77,49 +78,57 @@ export default function Calendar(
   const TimeModal = () => {
     const handleClose = () => {
       setShowModal(false);
-    };
-
-    const handleTimeChange = (time) => {
-      if(time) setConfirmTime(time);
+      setSelectedDate('');
     };
   
+    const handleTimeChange = (time) => {
+      if (time) setConfirmTime(time);
+    };
   
     const handleConfirmTime = () => {
-      const selectedTime = confirmTime.toISOString(); 
+      const selectedTime = confirmTime.toISOString();
       const phTime = new Date(selectedTime).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' }); // Convert the ISO string to Philippine time
-      console.log(phTime); 
-      setSelectedTime(phTime); 
+      console.log(phTime);
+      setSelectedTime(phTime);
       setShowModal(false);
-      setConfirmTime(null); 
+      setConfirmTime(null);
     };
     
   
     return (
       <Dialog open={showModal} onClose={handleClose}>
-      <DialogTitle>Available Time Slot</DialogTitle>
-      <DialogContent>
-        {selectedStartTime && selectedEndTime ? (
-          <DialogContentText>
-            {selectedStartTime} - {selectedEndTime}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer components={['TimePicker']}>
-              <TimePicker
-                label="Basic time picker"
-                value={confirmTime ? dayjs(confirmTime) : null}
-                onChange={handleTimeChange}
-              />
-              </DemoContainer>
-            </LocalizationProvider>
-          </DialogContentText>
-        ) : (
-          <DialogContentText>No available time slot for {selectedDateModal}</DialogContentText>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-        <Button onClick={handleConfirmTime}>Confirm</Button>
-      </DialogActions>
-    </Dialog>
+        <DialogTitle>Available Time Slot</DialogTitle>
+          <DialogContent>
+            {selectedStartTime && selectedEndTime ? (
+              token ? (
+                <DialogContentText>
+                  {selectedStartTime} - {selectedEndTime}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={['TimePicker']}>
+                      <TimePicker
+                        label="Basic time picker"
+                        value={confirmTime ? dayjs(confirmTime) : null}
+                        onAccept={handleTimeChange}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </DialogContentText>
+              ) : (
+                <div>
+                  {selectedStartTime} - {selectedEndTime}
+                  <DialogContentText></DialogContentText>
+                  <DialogContentText>Login to select time!</DialogContentText>
+                </div>
+              )
+            ) : (
+              <DialogContentText>No available time slot for {selectedDateModal}</DialogContentText>
+            )}
+          </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Close</Button>
+          {token && <Button onClick={handleConfirmTime}>Confirm</Button>}
+        </DialogActions>
+      </Dialog>
     );
   };
 

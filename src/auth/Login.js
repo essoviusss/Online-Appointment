@@ -24,6 +24,9 @@ export default function Login() {
   const [selectedDate, setSelectedDate] = React.useState(null);
   const [availableDates, setAvailableDates] = React.useState([]);
   const [unavailableDates, setUnavailableDates] = React.useState([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -34,22 +37,44 @@ export default function Login() {
   }, [navigate]);
 
   useEffect(() => {
-    const data = [
-      '2023-05-26',
-      '2023-05-29',
-      '2023-05-30',
-    ];
-    setUnavailableDates(data);
+    const fetchData = async () => {
+      try{
+        const url = "http://localhost/appointment_api/unavailable_dates.php";
+        const response = await axios.get(url);
+        if(Array.isArray(response.data)){
+          setUnavailableDates(response.data);
+        }
+      }catch(e){
+        alert(e);
+      }
+    }
+    fetchData();
   }, []);
 
   useEffect(() => {
-    const data = [
-      '2023-05-22',
-      '2023-05-23',
-      '2023-05-24',
-    ];
-    setAvailableDates(data);
+    const fetchData = async () => {
+      try{
+        const url = "http://localhost/appointment_api/available_dates.php";
+        const response = await axios.get(url);
+        if(Array.isArray(response.data)){
+          const timeSlots = response.data.map(dateObj => ({
+            date: dateObj.available_date,
+            start_time: dateObj.start_time,
+            end_time: dateObj.end_time
+          }));
+          setAvailableDates(response.data.map(dateObj => dateObj.available_date));
+          setAvailableTimeSlots(timeSlots);
+        }
+      }catch(e){
+        alert(e);
+      }
+    }
+    fetchData();
   }, []);
+
+  const handleTimeSlotClick = timeSlot => {
+    setSelectedTimeSlot(timeSlot);
+  };
 
   const signIn = async () => {
     const url = "http://localhost/appointment_api/login.php";
@@ -60,20 +85,21 @@ export default function Login() {
   
     try {
       const response = await axios.post(url, fData);
-      console.log(response.data);
   
       if (response.data.message !== "Success") {
-        console.log("Login failed:", response.data.message);
-        alert(response.data.message);
+        alert("Login failed:", response.data.message);
         return;
       }
   
       // Save the JWT token in the local storage
       const jwtToken = await response.data.token;
+      const UID = await response.data.UID;
       
       if (response.data.message === "Success") {
         alert("Login Successful");
         localStorage.setItem("token", jwtToken);
+        localStorage.setItem("UID", UID);
+        console.log(UID);
         navigate("/Appointment", { replace: true });
       } else {
         alert("User does not exist");
@@ -88,12 +114,17 @@ export default function Login() {
     <ThemeProvider theme={theme}>
       <div className='login-container'>
         <div className='column-left'>
-          <Calendar 
-            selectedDate={selectedDate} 
-            setSelectedDate={setSelectedDate} 
-            availableDates={availableDates}
-            unavailableDates={unavailableDates} 
-          />
+          <Calendar
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              selectedTime={selectedTime}
+              setSelectedTime={setSelectedTime}
+              availableDates={availableDates}
+              unavailableDates={unavailableDates}
+              availableTimeSlots={availableTimeSlots}
+              handleTimeSlotClick={handleTimeSlotClick}
+              selectedTimeSlot={selectedTimeSlot}
+            />
         </div>
         <div className='column-right'>
           <Container component="main" maxWidth="xs">

@@ -12,8 +12,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Calendar from '../utils/Calendar';
 import './auth_components/Login.css'
+import { v4 as uuidv4 } from 'uuid';
 
 export default function SignUp() {
+  const UID = uuidv4();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,6 +47,7 @@ export default function SignUp() {
     const url = 'http://localhost/appointment_api/SignIn.php';
 
     let fData = new FormData();
+    fData.append('UID', UID);
     fData.append('email', email);
     fData.append('password', password);
     fData.append('confirmPassword', confirmPassword);

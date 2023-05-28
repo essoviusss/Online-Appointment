@@ -6,6 +6,8 @@ import TextField from '@mui/material/TextField';
 import Textarea from '@mui/joy/Textarea';
 import Button from '@mui/material/Button';
 import { v4 as uuidv4 } from 'uuid';
+import './Components/Appointment.css'
+
 
 export default function Appointment() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -22,6 +24,7 @@ export default function Appointment() {
   const [purpose, setPurpose] = useState('');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
+
 
   useEffect(() => {
     const url = 'http://localhost/appointment_api/available_dates.php';
@@ -64,9 +67,11 @@ export default function Appointment() {
   const submitAppointment = async () => {
     try {
       const url = 'http://localhost/appointment_api/submit_appointment.php';
+      const user_id = localStorage.getItem("UID");
 
       let fData = new FormData();
       fData.append('UID', UID);
+      fData.append('user_id', user_id);
       fData.append('fullName', fullName);
       fData.append('department', department);
       fData.append('personnel', personnel);
@@ -133,8 +138,30 @@ export default function Appointment() {
             maxRows={4}
           />
         </div>
-        <div className="child5">
-        <Calendar
+        <div className='child5'>
+          <TextField
+            value={selectedDate}
+            id="outlined-basic"
+            label="Selected Date"
+            variant="outlined"
+            InputProps={{
+              readOnly: true
+            }}
+          />
+        </div>
+        <div className='child6'>
+          <TextField
+            value={selectedTime}
+            id="outlined-basic"
+            label="Selected Time"
+            variant="outlined"
+            InputProps={{
+              readOnly: true
+            }}
+          />
+        </div>
+        <div className="child7">
+          <Calendar
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             selectedTime={selectedTime}
@@ -145,7 +172,7 @@ export default function Appointment() {
             handleTimeSlotClick={handleTimeSlotClick}
             selectedTimeSlot={selectedTimeSlot}
             className="custom-calendar"
-            />
+          />
         </div>
         <div className="submitBtn">
           <Button onClick={submitAppointment} variant="contained">

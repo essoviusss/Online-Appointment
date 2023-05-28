@@ -36,18 +36,7 @@ const Sidebar = () => {
               <CDBSidebarMenuItem icon="table">View Appointment</CDBSidebarMenuItem>
             </NavLink>
           </CDBSidebarMenu>
-          
         </CDBSidebarContent>
-
-        <CDBSidebarFooter style={{ textAlign: 'center' }}>
-          <div
-            style={{
-              padding: '20px 5px',
-            }}
-          >
-           <Button onClick={logout}>Logout</Button>
-          </div>
-        </CDBSidebarFooter>
       </CDBSidebar>
     </div>
   );
