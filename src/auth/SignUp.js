@@ -21,7 +21,11 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = React.useState(null);
+  const [availableDates, setAvailableDates] = React.useState([]);
   const [unavailableDates, setUnavailableDates] = React.useState([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
   const theme = createTheme();
 
@@ -34,14 +38,44 @@ export default function SignUp() {
   }, [navigate]);
 
   useEffect(() => {
-    // Fetch or set the unavailable dates from your data source
-    const data = [
-      // '2023-05-24',
-      // '2023-05-28',
-      // '2023-05-29',
-    ];
-    setUnavailableDates(data);
+    const fetchData = async () => {
+      try{
+        const url = "http://localhost/appointment_api/unavailable_dates.php";
+        const response = await axios.get(url);
+        if(Array.isArray(response.data)){
+          setUnavailableDates(response.data.map(dateObj => dateObj.unavailable_date));
+        }
+      }catch(e){
+        alert(e);
+      }
+    }
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+        const url = "http://localhost/appointment_api/available_dates.php";
+        const response = await axios.get(url);
+        if(Array.isArray(response.data)){
+          const timeSlots = response.data.map(dateObj => ({
+            date: dateObj.available_date,
+            start_time: dateObj.start_time,
+            end_time: dateObj.end_time
+          }));
+          setAvailableDates(response.data.map(dateObj => dateObj.available_date));
+          setAvailableTimeSlots(timeSlots);
+        }
+      }catch(e){
+        alert(e);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const handleTimeSlotClick = timeSlot => {
+    setSelectedTimeSlot(timeSlot);
+  };
 
   const SignUp = async () => {
     const url = 'http://localhost/appointment_api/SignIn.php';
@@ -69,11 +103,17 @@ export default function SignUp() {
     <ThemeProvider theme={theme}>
       <div className="login-container">
         <div className="column-left">
-          <Calendar 
-          selectedDate={selectedDate} 
-          setSelectedDate={setSelectedDate} 
-          unavailableDates={unavailableDates}
-          />
+            <Calendar
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  selectedTime={selectedTime}
+                  setSelectedTime={setSelectedTime}
+                  availableDates={availableDates}
+                  unavailableDates={unavailableDates}
+                  availableTimeSlots={availableTimeSlots}
+                  handleTimeSlotClick={handleTimeSlotClick}
+                  selectedTimeSlot={selectedTimeSlot}
+            />
         </div>
         <div className="column-right">
           <Container component="main" maxWidth="xs">

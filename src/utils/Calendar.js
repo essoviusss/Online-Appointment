@@ -38,13 +38,14 @@ export default function Calendar(
         setSelectedDate('');
         setSelectedStartTime(null);
         setSelectedEndTime(null);
-      } 
-      else {
+      } else {
         setSelectedDate(dateString);
         showTimeModal(date);
       }
     }
   };
+  
+  
 
   const isDateAvailable = (date) => {
     const dateString = `${date.getFullYear()}-${('0' + (date.getMonth()+1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`;
@@ -86,44 +87,45 @@ export default function Calendar(
     };
   
     const handleConfirmTime = () => {
-      const selectedTime = confirmTime.toISOString();
-      const phTime = new Date(selectedTime).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' }); // Convert the ISO string to Philippine time
-      console.log(phTime);
-      setSelectedTime(phTime);
+      if (confirmTime) {
+        const selectedTime = confirmTime.toISOString();
+        const phTime = new Date(selectedTime).toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit' }); 
+        setSelectedTime(phTime);
+        setSelectedDate(selectedDateModal);
+      }
       setShowModal(false);
       setConfirmTime(null);
     };
-    
   
     return (
       <Dialog open={showModal} onClose={handleClose}>
         <DialogTitle>Available Time Slot</DialogTitle>
-          <DialogContent>
-            {selectedStartTime && selectedEndTime ? (
-              token ? (
-                <DialogContentText>
-                  {selectedStartTime} - {selectedEndTime}
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={['TimePicker']}>
-                      <TimePicker
-                        label="Basic time picker"
-                        value={confirmTime ? dayjs(confirmTime) : null}
-                        onAccept={handleTimeChange}
-                      />
-                    </DemoContainer>
-                  </LocalizationProvider>
-                </DialogContentText>
-              ) : (
-                <div>
-                  {selectedStartTime} - {selectedEndTime}
-                  <DialogContentText></DialogContentText>
-                  <DialogContentText>Login to select time!</DialogContentText>
-                </div>
-              )
+        <DialogContent>
+          {selectedStartTime && selectedEndTime ? (
+            token ? (
+              <DialogContentText>
+                {selectedStartTime} - {selectedEndTime}
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer components={['TimePicker']}>
+                    <TimePicker
+                      label="Basic time picker"
+                      value={confirmTime ? dayjs(confirmTime) : null}
+                      onAccept={handleTimeChange}
+                    />
+                  </DemoContainer>
+                </LocalizationProvider>
+              </DialogContentText>
             ) : (
-              <DialogContentText>No available time slot for {selectedDateModal}</DialogContentText>
-            )}
-          </DialogContent>
+              <div>
+                {selectedStartTime} - {selectedEndTime}
+                <DialogContentText></DialogContentText>
+                <DialogContentText>Login to select time!</DialogContentText>
+              </div>
+            )
+          ) : (
+            <DialogContentText>No available time slot for {selectedDateModal}</DialogContentText>
+          )}
+        </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Close</Button>
           {token && <Button onClick={handleConfirmTime}>Confirm</Button>}

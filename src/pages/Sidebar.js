@@ -2,28 +2,21 @@ import React from 'react';
 import {
   CDBSidebar,
   CDBSidebarContent,
-  CDBSidebarFooter,
   CDBSidebarHeader,
   CDBSidebarMenu,
   CDBSidebarMenuItem,
 } from 'cdbreact';
 import { NavLink } from 'react-router-dom';
-import { useNavigate } from "react-router";
-import Button from '@mui/material/Button';
+
 
 const Sidebar = () => {
-  const navigate = useNavigate();
-  const logout = () => {
-    localStorage.removeItem("token");
-    alert("You have been logged out!");
-    navigate("/", { replace: true });
-  };
+ 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}>
-      <CDBSidebar textColor="#fff" backgroundColor="black">
+      <CDBSidebar textColor="#fff" backgroundColor="rgb(0, 56, 168)">
         <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}>
           <a href="/" className="text-decoration-none" style={{ color: 'inherit' }}>
-            DepEd
+            DepEd Client
           </a>
         </CDBSidebarHeader>
 

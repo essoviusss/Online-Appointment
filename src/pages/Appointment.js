@@ -6,11 +6,21 @@ import TextField from '@mui/material/TextField';
 import Textarea from '@mui/joy/Textarea';
 import Button from '@mui/material/Button';
 import { v4 as uuidv4 } from 'uuid';
-import './Components/Appointment.css'
+import './Components/Appointment.css';
 
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
+import { useNavigate } from "react-router-dom";
+import jwtDecode from "jwt-decode";
+import useAuth from '../hooks/useAuth';
 
 export default function Appointment() {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const navigate = useNavigate();
+  const isLoggedIn = useAuth(); 
+  const [selectedDate, setSelectedDate] = useState('');
   const [availableDates, setAvailableDates] = useState([]);
   const [unavailableDates, setUnavailableDates] = useState([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
@@ -25,6 +35,21 @@ export default function Appointment() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Math.floor(Date.now() / 1000); // get the current time
+        if (currentTime > decodedToken.exp) {
+            localStorage.removeItem("token");
+            alert("Token expired, please login again");
+            navigate('/');
+        }
+    } else if (!isLoggedIn) {
+        navigate('/');
+    }
+}, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const url = 'http://localhost/appointment_api/available_dates.php';
@@ -52,7 +77,7 @@ export default function Appointment() {
       .get(url)
       .then(response => {
         if (Array.isArray(response.data)) {
-          setUnavailableDates(response.data);
+          setUnavailableDates(response.data.map(dateObj => dateObj.unavailable_date));
         }
       })
       .catch(error => {
@@ -65,119 +90,142 @@ export default function Appointment() {
   };
 
   const submitAppointment = async () => {
-    try {
-      const url = 'http://localhost/appointment_api/submit_appointment.php';
-      const user_id = localStorage.getItem("UID");
-
-      let fData = new FormData();
-      fData.append('UID', UID);
-      fData.append('user_id', user_id);
-      fData.append('fullName', fullName);
-      fData.append('department', department);
-      fData.append('personnel', personnel);
-      fData.append('purpose', purpose);
-      fData.append('selectedDate', selectedDate);
-      fData.append('selectedTime', selectedTime);
-
-      const response = await axios.post(url, fData);
-      if (response.data.message === 'success') {
-        alert('You have submitted your appointment!');
-      } else {
-        alert(response.data);
+    if(fullName === "" || department === "" || personnel === "" || purpose === "" || selectedDate === "" ||selectedTime === ""){
+      alert("Please Input all the Fields!");
+    }else{
+      try {
+        const url = 'http://localhost/appointment_api/submit_appointment.php';
+        const user_id = localStorage.getItem('UID');
+  
+        let fData = new FormData();
+        fData.append('UID', UID);
+        fData.append('user_id', user_id);
+        fData.append('fullName', fullName);
+        fData.append('department', department);
+        fData.append('personnel', personnel);
+        fData.append('purpose', purpose);
+        fData.append('selectedDate', selectedDate);
+        fData.append('selectedTime', selectedTime);
+  
+        const response = await axios.post(url, fData);
+        if (response.data.message === 'success') {
+          alert('You have submitted your appointment!');
+          navigate("/ViewAppointment");
+        } else {
+          alert(response.data);
+        }
+      } catch (e) {
+        alert(e);
       }
-    } catch (e) {
-      alert(e);
     }
   };
 
-  useEffect(() =>{
-    const fetchData = async () =>{
-        const url = "http://localhost/appointment_api/read_departments.php";
-        const response = await axios.get(url);
-        if(Array.isArray(response.data)){
-            setDepartments(response.data);
-        }
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      const url = 'http://localhost/appointment_api/read_departments.php';
+      const response = await axios.get(url);
+      if (Array.isArray(response.data)) {
+        setDepartments(response.data);
+      }
+    };
     fetchData();
-  },[])
+  }, []);
 
   return (
     <div className="global_container">
       <Header />
       <div className="appointment_container">
-        <div className="child1">
-          <TextField
-            onChange={e => setFullName(e.target.value)}
-            id="outlined-basic"
-            label="Full Name"
-            variant="outlined"
-          />
+        <div className="form_container">
+          <div className="form_field">
+            <TextField
+              onChange={e => setFullName(e.target.value)}
+              id="outlined-basic"
+              label="Full Name"
+              variant="outlined"
+              fullWidth
+            />
+          </div>
+          <div className="form_field">
+            <TextField
+              onChange={e => setPersonnel(e.target.value)}
+              id="outlined-basic"
+              label="Personnel"
+              variant="outlined"
+              fullWidth
+            />
+          </div>
         </div>
-        <div className="child2">
-            <select value={department} onChange={(e) => setDepartment(e.target.value)}>
-                <option>--Select Department--</option>
+        <div className='below-cont'>
+            <div className="form_field2">
+              <TextField
+                value={selectedDate}
+                id="outlined-basic"
+                label="Selected Date"
+                variant="outlined"
+                fullWidth
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+            </div>
+            <div className="form_field2">
+              <TextField
+                value={selectedTime}
+                id="outlined-basic"
+                label="Selected Time"
+                variant="outlined"
+                fullWidth
+                InputProps={{
+                  readOnly: true
+                }}
+              />
+            </div>
+          <div className="form_field1">
+            <FormControl fullWidth>
+              <InputLabel id="department-label">Department</InputLabel>
+              <Select
+                labelId="department-label"
+                id="department-select"
+                value={department}
+                label="Department"
+                onChange={e => setDepartment(e.target.value)}
+              >
                 {departments.map((department, index) => (
-                <option key={index}>{department}</option>
+                  <MenuItem key={index} value={department}>{department}</MenuItem>
                 ))}
-            </select>
+              </Select>
+            </FormControl>
+          </div>
         </div>
-        <div className="child3">
-          <TextField
-            onChange={e => setPersonnel(e.target.value)}
-            id="outlined-basic"
-            label="Personnel"
-            variant="outlined"
-          />
+        <div className='below-cont1'>
+          <div className="form_field3">
+            <Calendar
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              setSelectedTime={setSelectedTime}
+              availableDates={availableDates}
+              unavailableDates={unavailableDates}
+              availableTimeSlots={availableTimeSlots}
+              handleTimeSlotClick={handleTimeSlotClick}
+              selectedTimeSlot={selectedTimeSlot}
+              className="custom-calendar"
+            />
+          </div>
+          <div className="form_field3">
+            <Textarea
+              onChange={e => setPurpose(e.target.value)}
+              placeholder="Purpose…"
+              minRows={11.9}
+              maxRows={11.9}
+            />
+          </div>
         </div>
-        <div className="child4">
-          <Textarea
-            onChange={e => setPurpose(e.target.value)}
-            placeholder="Type in here…"
-            defaultValue="Try to put text longer than 4 lines."
-            minRows={2}
-            maxRows={4}
-          />
-        </div>
-        <div className='child5'>
-          <TextField
-            value={selectedDate}
-            id="outlined-basic"
-            label="Selected Date"
-            variant="outlined"
-            InputProps={{
-              readOnly: true
-            }}
-          />
-        </div>
-        <div className='child6'>
-          <TextField
-            value={selectedTime}
-            id="outlined-basic"
-            label="Selected Time"
-            variant="outlined"
-            InputProps={{
-              readOnly: true
-            }}
-          />
-        </div>
-        <div className="child7">
-          <Calendar
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            selectedTime={selectedTime}
-            setSelectedTime={setSelectedTime}
-            availableDates={availableDates}
-            unavailableDates={unavailableDates}
-            availableTimeSlots={availableTimeSlots}
-            handleTimeSlotClick={handleTimeSlotClick}
-            selectedTimeSlot={selectedTimeSlot}
-            className="custom-calendar"
-          />
-        </div>
-        <div className="submitBtn">
-          <Button onClick={submitAppointment} variant="contained">
-            Submit
-          </Button>
+        <div className='below-cont2'>
+          <div className="form_field4">
+            <Button onClick={submitAppointment} variant="contained" fullWidth>
+              Submit
+            </Button>
+          </div>
         </div>
       </div>
     </div>

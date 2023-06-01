@@ -22,7 +22,7 @@ const ViewAppointmentModal = ({ selectedAppointment, onClose }) => {
                 p: 4,
             }}>
                 <Typography variant="h6" id="view-appointment-modal" component="div">
-                    View Appointment
+                    <h2>View Appointment</h2>
                 </Typography>
                 {selectedAppointment && (
                     <div>
@@ -44,8 +44,10 @@ const ViewAppointmentModal = ({ selectedAppointment, onClose }) => {
                         <Typography variant="body1" id="view-appointment-modal-description">
                             Selected Time: {selectedAppointment.selected_time}
                         </Typography>
-                        {selectedAppointment.status === "Cancelled" ? <Typography variant="body1" id="view-appointment-modal-description">
-                            Status: {selectedAppointment.reason}
+                        {selectedAppointment.status === "Cancelled" 
+                        || selectedAppointment.status === "Rescheduled" ? 
+                        <Typography variant="body1" id="view-appointment-modal-description">
+                            Reason: {selectedAppointment.reason}
                         </Typography> : ""}
                         <Typography variant="body1" id="view-appointment-modal-description">
                             Status: {selectedAppointment.status}

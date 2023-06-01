@@ -42,7 +42,7 @@ export default function Login() {
         const url = "http://localhost/appointment_api/unavailable_dates.php";
         const response = await axios.get(url);
         if(Array.isArray(response.data)){
-          setUnavailableDates(response.data);
+          setUnavailableDates(response.data.map(dateObj => dateObj.unavailable_date));
         }
       }catch(e){
         alert(e);
