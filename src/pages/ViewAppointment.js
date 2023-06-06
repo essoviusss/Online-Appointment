@@ -161,7 +161,7 @@ const ViewAppointment = () => {
                                     <TableCell style={{ textAlign: 'center' }}>{appointment.status}</TableCell>
                                     <TableCell style={{ textAlign: 'center' }}>
                                         <Button onClick={() => handleOpenViewModal(appointment)}>View</Button>
-                                        <Button onClick={() => handleOpenModal(appointment)}>Cancel</Button>
+                                        {appointment.status === "Approved" || appointment.status === "Rescheduled" || appointment.status === "Cancelled" ? "" : <Button onClick={() => handleOpenModal(appointment)}>Cancel</Button>}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -241,6 +241,10 @@ const ViewAppointment = () => {
                             </Typography>
                             <Typography variant="subtitle1" gutterBottom>
                                 Selected Time: {selectedAppointment.selected_time}
+                            </Typography>
+                            
+                            <Typography variant="subtitle1" gutterBottom>
+                                Reason: {selectedAppointment.reason}
                             </Typography>
                             <Typography variant="subtitle1" gutterBottom>
                                 Status: {selectedAppointment.status}

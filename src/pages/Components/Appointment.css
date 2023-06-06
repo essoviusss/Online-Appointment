@@ -50,15 +50,17 @@
 
   .below-cont2{
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 20px;
     margin-left: 2%;
     margin-right: 2%;
   }
 
   .form_field4 {
+    
+    height: 100px;
     margin-top: 2%;
-    width: 100%;
+    width: 20%;
   }
   
   @media screen and (max-width: 768px) {
