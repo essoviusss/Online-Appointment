@@ -50,7 +50,7 @@
 
   .below-cont2{
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     margin-top: 20px;
     margin-left: 2%;
     margin-right: 2%;

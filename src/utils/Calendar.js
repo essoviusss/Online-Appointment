@@ -108,7 +108,7 @@ export default function Calendar(
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DemoContainer components={['TimePicker']}>
                     <TimePicker
-                      label="Basic time picker"
+                      label="Select Time"
                       value={confirmTime ? dayjs(confirmTime) : null}
                       onAccept={handleTimeChange}
                     />
